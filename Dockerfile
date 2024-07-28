@@ -4,14 +4,15 @@ ARG DISTRO_VARIANT="bullseye"
 FROM docker.io/tiredofit/nginx:${DISTRO}-${DISTRO_VARIANT}
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
+# Arguments
 ARG DISCOURSE_VERSION
 ARG RUBY_VERSION
 
-### Environment Variables
-ENV DISCOURSE_VERSION=${DISCOURSE_VERSION:-"v3.0.2"} \
-    RUBY_VERSION=${RUBY_VERSION:-"3.0.5"} \
+# Environment Variables
+ENV DISCOURSE_VERSION=${DISCOURSE_VERSION:-"v3.2"} \
+    RUBY_VERSION=${RUBY_VERSION:-"3.2.1"} \
     RUBY_ALLOCATOR=/usr/lib/libjemalloc.so.2 \
-    RAILS_ENV=production \
+    RAILS_ENV=development \
     RUBY_GC_MALLOC_LIMIT=90000000 \
     RUBY_GLOBAL_METHOD_CACHE_SIZE=131072 \
     ENABLE_NGINX=FALSE \
@@ -19,166 +20,139 @@ ENV DISCOURSE_VERSION=${DISCOURSE_VERSION:-"v3.0.2"} \
     NGINX_PROXY_URL=http://127.0.0.1:3000 \
     NGINX_ENABLE_CREATE_SAMPLE_HTML=FALSE \
     IMAGE_NAME="tiredofit/discourse" \
-    IMAGE_REPO_URL="https://github.com/tiredofit/docker-discourse/"
+    IMAGE_REPO_URL="https://github.com/Ahsan1447/discourse/" \
+    REDIS_URL=redis://discourse-redis:6379
 
-### Install Dependencies
-RUN source /assets/functions/00-container && \
-    BUILD_DEPS=" \
-                build-essential \
-                libbz2-dev \
-                libfreetype6-dev \
-                libjemalloc-dev \
-                libjpeg-dev \
-                libssl-dev \
-                libpq-dev \
-                libtiff-dev \
-                libxslt-dev \
-                libxml2-dev \
-                pkg-config \
-                zlib1g-dev \
-                " && \
-    set -x && \
+# Install Dependencies
+RUN apt-get update && \
+    apt-get install -y \
+        libyaml-dev \
+        build-essential \
+        libbz2-dev \
+        libfreetype6-dev \
+        libjemalloc-dev \
+        libjpeg-dev \
+        libssl-dev \
+        libpq-dev \
+        libtiff-dev \
+        libxslt-dev \
+        libxml2-dev \
+        pkg-config \
+        zlib1g-dev \
+        curl \
+        gnupg \
+        lsb-release \
+        git \
+        make \
+        ca-certificates && \
+        set -x && \
     addgroup --gid 9009 --system discourse && \
     adduser --uid 9009 --gid 9009 --home /dev/null --gecos "Discourse" --shell /sbin/nologin --disabled-password discourse && \
-    curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo "deb https://deb.nodesource.com/node_16.x $(cat /etc/os-release |grep "VERSION=" | awk 'NR>1{print $1}' RS='(' FS=')') main" > /etc/apt/sources.list.d/nodejs.list && \
+    # Install a specific version of Node.js
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    # Add Yarn repository and install Yarn
     curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list && \
+    apt-get update && \
+    apt-get install -y yarn && \
+    # Add PostgreSQL repository and install PostgreSQL client
     curl -ssL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ $(cat /etc/os-release |grep "VERSION=" | awk 'NR>1{print $1}' RS='(' FS=')')-pgdg main" > /etc/apt/sources.list.d/postgres.list && \
-    package update && \
-    package upgrade -y && \
-    package install \
-                ${BUILD_DEPS} \
-                advancecomp \
-                brotli \
-                ghostscript \
-                gifsicle \
-                git \
-                gsfonts \
-                imagemagick \
-                jhead \
-                jpegoptim \
-                libicu67 \
-                libjemalloc2 \
-                libjpeg-turbo-progs \
-                libpq5 \
-                libssl1.1 \
-                libxml2 \
-                nodejs \
-                optipng \
-                pngquant \
-                postgresql-client-15 \
-                postgresql-contrib-15 \
-                yarn \
-                zlib1g \
-                && \
-    \
-    mkdir -p /usr/src/oxipng && \
-    curl -sSL https://github.com/shssoichiro/oxipng/releases/download/v7.0.0/oxipng-7.0.0-x86_64-unknown-linux-musl.tar.gz | tar xvfz - --strip 1 -C /usr/src/oxipng && \
-    cp -R /usr/src/oxipng/oxipng /usr/bin && \
-    \
-    ### Setup Ruby
-    mkdir -p /usr/src/ruby && \
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/postgres.list && \
+    apt-get update && \
+    apt-get install -y postgresql-client-15 postgresql-contrib-15 && \
+    # Install additional packages
+    apt-get install -y \
+        advancecomp \
+        brotli \
+        ghostscript \
+        gifsicle \
+        gsfonts \
+        imagemagick \
+        jhead \
+        jpegoptim \
+        libicu67 \
+        libjemalloc2 \
+        libjpeg-turbo-progs \
+        libpq5 \
+        libssl1.1 \
+        libxml2 \
+        optipng \
+        pngquant \
+        zlib1g && \
+    # Clean up
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Ruby
+RUN mkdir -p /usr/src/ruby && \
     curl -sSL https://cache.ruby-lang.org/pub/ruby/$(echo ${RUBY_VERSION} | cut -c1-3)/ruby-${RUBY_VERSION}.tar.gz | tar xvfz - --strip 1 -C /usr/src/ruby && \
     cd /usr/src/ruby && \
     ./configure \
-                --disable-install-rdoc \
-                --enable-shared \
-                --with-jemalloc \
-                && \
+        --disable-install-rdoc \
+        --enable-shared \
+        --with-jemalloc && \
     make -j$(getconf _NPROCESSORS_ONLN) && \
     make install && \
-    \
     echo 'gem: --no-document' >> /usr/local/etc/gemrc && \
-    gem update --system && \
-    \
-    npm install --global \
+    gem update --system
+
+# Install npm packages
+RUN npm install --global \
         svgo \
         terser \
         uglify-js \
-        pnpm \
-        && \
-    \
-    ### Download Discourse
-    clone_git_repo "https://github.com/discourse/discourse" "${DISCOURSE_VERSION}" /app && \
-    BUNDLER_VERSION="$(grep "BUNDLED WITH" Gemfile.lock -A 1 | grep -v "BUNDLED WITH" | tr -d "[:space:]")" && \
+        pnpm
+
+# Download and setup Discourse
+RUN git clone "https://github.com/Ahsan1447/discourse" /app && \
+    BUNDLER_VERSION="$(grep "BUNDLED WITH" /app/Gemfile.lock -A 1 | grep -v "BUNDLED WITH" | tr -d "[:space:]")" && \
     gem install bundler:"${BUNDLER_VERSION}" && \
-    chown -R discourse:discourse /app && \
+    cd /app && \
     bundle config build.nokogiri --use-system-libraries && \
     bundle config --local path ./vendor/bundle && \
     bundle config set --local deployment true && \
-    bundle config set --local without development test && \
+    # bundle config set --local without development test && \
     bundle install --jobs 4 && \
-    yarn install --production --frozen-lockfile &&\
-    yarn cache clean &&\
+    yarn install && \
+    yarn cache clean && \
     cd /app/app/assets/javascripts/discourse && \
-    /app/app/assets/javascripts/node_modules/.bin/ember build -prod && \
-    bundle exec rake maxminddb:get &&\
+    /app/node_modules/.bin/ember build -prod && \
+    # bundle exec rake maxminddb:get && \
     find /app/vendor/bundle -name tmp -type d -exec rm -rf {} + && \
-    sed  -i "5i\ \ require 'uglifier'" /app/config/environments/production.rb && \
-    sed -i "s|config.assets.js_compressor = :uglifier|config.assets.js_compressor = Uglifier.new(harmony: true)|g" /app/config/environments/production.rb  && \
-    \
-#### Install Plugins
-    mkdir -p /assets/discourse/plugins && \
+    sed -i "5i\ \ require 'uglifier'" /app/config/environments/development.rb && \
+    sed -i "s|config.assets.js_compressor = :uglifier|config.assets.js_compressor = Uglifier.new(harmony: true)|g" /app/config/environments/development.rb
+
+RUN git config --global --add safe.directory /app
+
+# Install Plugins
+RUN mkdir -p /assets/discourse/plugins && \
     mv /app/plugins/* /assets/discourse/plugins && \
     rm -rf /assets/discourse/plugins/discourse-nginx-performance-report && \
-    ## Allow Same Origin
     git clone https://github.com/TheBunyip/discourse-allow-same-origin.git /assets/discourse/plugins/allow-same-origin && \
-    ## Allow Accepted Answers on Topics
     git clone https://github.com/discourse/discourse-solved /assets/discourse/plugins/solved && \
-    ### Assign Plugin
     git clone https://github.com/discourse/discourse-assign /assets/discourse/plugins/assign && \
-    ## Checklist Plugin
-    git clone https://github.com/cpradio/discourse-plugin-checklist /assets/discourse/plugins/checklist && \
-    ### Events Plugin
+    # git clone https://github.com/cpradio/discourse-plugin-checklist /assets/discourse/plugins/checklist && \
     git clone https://github.com/angusmcleod/discourse-events /assets/discourse/plugins/events && \
-    ### Footnote Plugin
-    git clone https://github.com/discourse/discourse-footnote /assets/discourse/plugins/footnote && \
-    ### Formatting Toolbar Plugin
+    # git clone https://github.com/discourse/discourse-footnote /assets/discourse/plugins/footnote && \
     git clone https://github.com/MonDiscourse/discourse-formatting-toolbar /assets/discourse/plugins/formatting-toolbar && \
-    ### Mermaid
     git clone https://github.com/unfoldingWord/discourse-mermaid /assets/discourse/plugins/mermaid && \
-    ### Post Voting
     git clone https://github.com/discourse/discourse-post-voting /assets/discourse/plugins/post-voting && \
-    ## Push Notifications
     git clone https://github.com/discourse/discourse-push-notifications /assets/discourse/plugins/push && \
     ## Spoiler Alert
-    git clone https://github.com/discourse/discourse-spoiler-alert /assets/discourse/plugins/spoiler-alert && \
+    # git clone https://github.com/discourse/discourse-spoiler-alert /assets/discourse/plugins/spoiler-alert && \
     ## Adds the ability for voting on a topic in category
     git clone https://github.com/discourse/discourse-voting.git /assets/discourse/plugins/voting && \
-    chown -R discourse:discourse \
-                                /assets/discourse \
-                                /app \
-                                && \
-### Cleanup
-    package remove ${BUILD_DEPS} && \
-    package cleanup && \
-    rm -rf \
-        /app/.devcontainer \
-        /app/.editorconfig \
-        /app/.github \
-        /app/.*ignore \
-        /app/.prettier* \
-        /app/.vscode-sample \
-        /app/bin/docker \
-        /app/Brewfile \
-        /app/CONTRIBUTING.md \
-        /app/d \
-        /app/discourse.sublime-project \
-        /app/install-imagemagick \
-        /app/lefthook.yml \
-        /app/test \
-        /app/translator.yml \
-        /app/vendor/bundle/ruby/${RUBY_VERSION:0:3}/cache/* \
-        /root/.bundle \
-        /root/.config \
-        /root/.local \
-        /root/.npm \
-        /root/.profile \
-        /tmp/* \
-        /usr/src/*
+    # Ensure the directory exists before chown
+    mkdir -p /assets/discourse/plugins && \
+    chown -R discourse:discourse /assets/discourse /app
+
+# Cleanup
+RUN apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/ /tmp/ /usr/src/*
 
 WORKDIR /app
-EXPOSE 3000
+EXPOSE 3000 4200
 COPY install/ /

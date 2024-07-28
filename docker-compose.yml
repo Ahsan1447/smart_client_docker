@@ -1,0 +1,67 @@
+version: '3'
+services:
+  discourse-app:
+    container_name: discourse-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.discourse-example-org.rule=Host(`discourse.example.com`)
+      - traefik.http.services.discourse-example-org.loadbalancer.server.port=3000
+    volumes:
+      - ./logs:/data/logs
+      - ./database.yml:/app/config/database.yml
+      - ./data/uploads:/data/uploads
+      - ./data/backups:/data/backups
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=discourse-app
+      - DB_HOST=discourse-db
+      - DB_NAME=discourse
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - REDIS_HOST=discourse-redis
+      - REDIS_URL=redis://discourse-redis:6379
+      - SITE_HOSTNAME=localhost
+      - SMTP_PORT=25
+      - SMTP_HOST=postfix-relay
+      - developer_emails=hostmaster@example.com
+    ports:
+      - 3000:3000
+    depends_on:
+      - discourse-db
+      - discourse-redis
+    restart: unless-stopped
+
+  discourse-db:
+    image: postgres:15
+    container_name: discourse-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./logs:/var/log/postgresql
+      - ./install/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - PGDATA=/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+
+  discourse-redis:
+    image: "redis:6.2.14"
+    container_name: discourse-redis
+    volumes:
+      - redis:/data
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=discourse-redis
+    restart: always
+
+volumes:
+  redis:
+    driver: local
+  postgres-data:
+    driver: local
