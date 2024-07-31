@@ -68,7 +68,6 @@ RUN apt-get update && \
         ghostscript \
         gifsicle \
         gsfonts \
-        imagemagick \
         jhead \
         jpegoptim \
         libicu67 \
@@ -80,6 +79,19 @@ RUN apt-get update && \
         optipng \
         pngquant \
         zlib1g && \
+    # Install ImageMagick 7 from source
+    apt-get install -y \
+        wget \
+        software-properties-common && \
+    wget https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.0-61.tar.gz && \
+    tar xvzf 7.1.0-61.tar.gz && \
+    cd ImageMagick-7.1.0-61 && \
+    ./configure && \
+    make && \
+    make install && \
+    ldconfig /usr/local/lib && \
+    cd .. && \
+    rm -rf ImageMagick-7.1.0-61 7.1.0-61.tar.gz && \
     # Clean up
     apt-get autoremove -y && \
     apt-get clean && \
@@ -99,7 +111,8 @@ RUN mkdir -p /usr/src/ruby && \
     gem update --system
 
 # Install npm packages
-RUN npm install --global \
+RUN npm install -g npm@10.8.2 && \
+        npm install --global \
         svgo \
         terser \
         uglify-js \
