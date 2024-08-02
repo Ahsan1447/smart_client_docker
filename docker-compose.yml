@@ -66,3 +66,6 @@ volumes:
     driver: local
   postgres-data:
     driver: local
+    driver_opts:
+      type: directory
+      o: 755
