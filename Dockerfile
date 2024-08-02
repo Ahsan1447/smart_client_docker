@@ -119,7 +119,7 @@ RUN npm install -g npm@10.8.2 && \
         pnpm
 
 # Download and setup Discourse
-RUN git clone "https://github.com/Ahsan1447/discourse" /app && \
+RUN git clone "https://github.com/Ahsan1447/smart_client_discourse" /app && \
     BUNDLER_VERSION="$(grep "BUNDLED WITH" /app/Gemfile.lock -A 1 | grep -v "BUNDLED WITH" | tr -d "[:space:]")" && \
     gem install bundler:"${BUNDLER_VERSION}" && \
     cd /app && \
