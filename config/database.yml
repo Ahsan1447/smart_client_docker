@@ -1,0 +1,44 @@
+development:
+  prepared_statements: false
+  adapter: postgresql
+  username: <%= ENV["DB_USER"] %>
+  password: <%= ENV["DB_PASS"] %>
+  database: <%= ENV["DB_NAME"] %>
+  host: <%= ENV["DB_HOST"] %>
+  
+test:
+  prepared_statements: false
+  adapter: postgresql
+  username: <%= ENV['POSTGRES_USER'] || 'postgres' %>
+  password: <%= ENV['POSTGRES_PASSWORD'] || 'postgres' %>
+  database: test_db
+  min_messages: warning
+  pool: 1
+  reaping_frequency: 0
+  checkout_timeout: <%= ENV["CHECKOUT_TIMEOUT"] || 5 %>
+  host_names:
+    - test.localhost
+
+# profile db is used for benchmarking using the script/bench.rb script
+profile:
+  prepared_statements: false
+  adapter: postgresql
+  database: discourse_profile
+  min_messages: warning
+  pool: 5
+  host_names:
+    - "localhost"
+# You may be surprised production is not here, it is sourced from application.rb using a monkey patch
+# This is done for 2 reasons
+#
+# 1. we need to support blank settings correctly and rendering nothing in yaml/erb is a PITA
+# 2. why go from object -> yaml -> object, pointless
+production:
+  prepared_statements: false
+  adapter: postgresql
+  username: <%= ENV["DB_USER"] %>
+  password: <%= ENV["DB_PASS"] %>
+  database: <%= ENV["DB_NAME"] %>
+  host: <%= ENV["DB_HOST"] %>
+  host_names:
+    - "localhost"
