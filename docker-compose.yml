@@ -33,7 +33,7 @@ services:
       - discourse-logs:/data/logs
       - discourse-uploads:/data/uploads
       - discourse-backups:/data/backups
-      - ./database.yml:/app/config/database.yml:z
+      # - ./database.yml:/app/config/database.yml:z
 
   discourse-db:
     image: postgres:15
