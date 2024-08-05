@@ -9,11 +9,6 @@ services:
       - traefik.enable=true
       - traefik.http.routers.discourse-example-org.rule=Host(`discourse.example.com`)
       - traefik.http.services.discourse-example-org.loadbalancer.server.port=3000
-    volumes:
-      - ./logs:/data/logs
-      - ./database.yml:/app/config/database.yml
-      - ./data/uploads:/data/uploads
-      - ./data/backups:/data/backups
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=discourse-app
@@ -34,14 +29,18 @@ services:
       - discourse-db
       - discourse-redis
     restart: unless-stopped
+    volumes:
+      - discourse-logs:/data/logs
+      - discourse-uploads:/data/uploads
+      - discourse-backups:/data/backups
 
   discourse-db:
     image: postgres:15
     container_name: discourse-db
     volumes:
-      - ./data:/var/lib/postgresql/data
-      - ./logs:/var/log/postgresql
-      - ./install/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - postgres-data:/var/lib/postgresql/data
+      - postgres-logs:/var/log/postgresql
+      - postgres-pg_hba:/etc/postgresql/pg_hba.conf
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -66,6 +65,13 @@ volumes:
     driver: local
   postgres-data:
     driver: local
-    driver_opts:
-      type: directory
-      o: 755
+  discourse-logs:
+    driver: local
+  discourse-uploads:
+    driver: local
+  discourse-backups:
+    driver: local
+  postgres-logs:
+    driver: local
+  postgres-pg_hba:
+    driver: local
