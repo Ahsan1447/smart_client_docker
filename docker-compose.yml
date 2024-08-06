@@ -18,7 +18,7 @@ services:
       - DB_PASS=postgres
       - REDIS_HOST=discourse-redis
       - REDIS_URL=redis://discourse-redis:6379
-      - SITE_HOSTNAME=localhost
+      - SITE_HOSTNAME=18.191.68.85
       - SMTP_PORT=25
       - SMTP_HOST=postfix-relay
       - developer_emails=hostmaster@example.com
