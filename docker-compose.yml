@@ -5,10 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # labels:
-    #   - traefik.enable=true
-    #   - traefik.http.routers.discourse-example-org.rule=Host(`discourse.example.com`)
-    #   - traefik.http.services.discourse-example-org.loadbalancer.server.port=3000
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.discourse-app.rule=Host(`18.191.68.85`)
+      - traefik.http.services.discourse-app.loadbalancer.server.port=3000
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=discourse-app
