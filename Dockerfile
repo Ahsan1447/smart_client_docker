@@ -167,6 +167,8 @@ RUN apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/ /tmp/ /usr/src/*
 
 COPY database.yml /app/config/database.yml
+COPY development.rb /app/config/environments/development.rb
+COPY production.rb /app/config/environments/production.rb
 WORKDIR /app
 EXPOSE 3000 4200
 COPY install/ /
