@@ -24,7 +24,7 @@ services:
       - developer_emails=hostmaster@example.com
     ports:
       - 3000:3000
-      - 80:4200
+      - 8080:4200
     depends_on:
       - discourse-db
       - discourse-redis
