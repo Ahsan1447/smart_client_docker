@@ -9,6 +9,8 @@ services:
       - traefik.enable=true
       - traefik.http.routers.discourse-app.rule=Host(`18.191.68.85`)
       - traefik.http.services.discourse-app.loadbalancer.server.port=3000
+      - traefik.http.routers.discourse-frontend.rule=Host(`18.191.68.85`)
+      - traefik.http.services.discourse-frontend.loadbalancer.server.port=4200
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=discourse-app
