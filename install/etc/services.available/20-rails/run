@@ -25,7 +25,7 @@ bundle exec rails server -b 0.0.0.0 &
 cd /app/app/assets/javascripts/discourse
 
 # Start the Ember server with proxy in the background
-yarn run ember serve --proxy "http://localhost:3000" &
+yarn run ember serve --proxy "http://discourse-app:3000" &
 
 # Wait for all background jobs to complete (this keeps the container running)
 wait
