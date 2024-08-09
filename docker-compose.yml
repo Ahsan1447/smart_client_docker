@@ -15,7 +15,7 @@ services:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=discourse-app
       - DB_HOST=discourse-db
-      - DB_NAME=smart_client_discourse_development
+      - DB_NAME=discourse
       - DB_USER=postgres
       - DB_PASS=postgres
       - REDIS_HOST=discourse-redis

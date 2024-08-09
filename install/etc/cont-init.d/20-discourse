@@ -8,7 +8,8 @@ bootstrap_filesystem
 configure_discourse
 custom_files /app/
 custom_scripts
-configure_plugins
+# configure_plugins
+create_db
 migrate_db
 compile_assets
 

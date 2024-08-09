@@ -126,7 +126,7 @@ RUN git clone "https://github.com/Ahsan1447/smart_client_discourse" /app && \
     bundle config build.nokogiri --use-system-libraries && \
     bundle config --local path ./vendor/bundle && \
     bundle config set --local deployment true && \
-    # bundle config set --local without development test && \
+    bundle config set --local without development test && \
     bundle install --jobs 4 && \
     yarn install && \
     yarn cache clean && \
@@ -140,26 +140,26 @@ RUN git clone "https://github.com/Ahsan1447/smart_client_discourse" /app && \
 RUN git config --global --add safe.directory /app
 
 # Install Plugins
-RUN mkdir -p /assets/discourse/plugins && \
-    mv /app/plugins/* /assets/discourse/plugins && \
-    rm -rf /assets/discourse/plugins/discourse-nginx-performance-report && \
-    git clone https://github.com/TheBunyip/discourse-allow-same-origin.git /assets/discourse/plugins/allow-same-origin && \
-    git clone https://github.com/discourse/discourse-solved /assets/discourse/plugins/solved && \
-    git clone https://github.com/discourse/discourse-assign /assets/discourse/plugins/assign && \
-    # git clone https://github.com/cpradio/discourse-plugin-checklist /assets/discourse/plugins/checklist && \
-    git clone https://github.com/angusmcleod/discourse-events /assets/discourse/plugins/events && \
-    # git clone https://github.com/discourse/discourse-footnote /assets/discourse/plugins/footnote && \
-    git clone https://github.com/MonDiscourse/discourse-formatting-toolbar /assets/discourse/plugins/formatting-toolbar && \
-    git clone https://github.com/unfoldingWord/discourse-mermaid /assets/discourse/plugins/mermaid && \
-    git clone https://github.com/discourse/discourse-post-voting /assets/discourse/plugins/post-voting && \
-    git clone https://github.com/discourse/discourse-push-notifications /assets/discourse/plugins/push && \
-    ## Spoiler Alert
-    # git clone https://github.com/discourse/discourse-spoiler-alert /assets/discourse/plugins/spoiler-alert && \
-    ## Adds the ability for voting on a topic in category
-    git clone https://github.com/discourse/discourse-voting.git /assets/discourse/plugins/voting && \
-    # Ensure the directory exists before chown
-    mkdir -p /assets/discourse/plugins && \
-    chown -R discourse:discourse /assets/discourse /app
+# RUN mkdir -p /assets/discourse/plugins && \
+#     mv /app/plugins/* /assets/discourse/plugins && \
+#     rm -rf /assets/discourse/plugins/discourse-nginx-performance-report && \
+#     git clone https://github.com/TheBunyip/discourse-allow-same-origin.git /assets/discourse/plugins/allow-same-origin && \
+#     git clone https://github.com/discourse/discourse-solved /assets/discourse/plugins/solved && \
+#     git clone https://github.com/discourse/discourse-assign /assets/discourse/plugins/assign && \
+#     # git clone https://github.com/cpradio/discourse-plugin-checklist /assets/discourse/plugins/checklist && \
+#     git clone https://github.com/angusmcleod/discourse-events /assets/discourse/plugins/events && \
+#     # git clone https://github.com/discourse/discourse-footnote /assets/discourse/plugins/footnote && \
+#     git clone https://github.com/MonDiscourse/discourse-formatting-toolbar /assets/discourse/plugins/formatting-toolbar && \
+#     git clone https://github.com/unfoldingWord/discourse-mermaid /assets/discourse/plugins/mermaid && \
+#     git clone https://github.com/discourse/discourse-post-voting /assets/discourse/plugins/post-voting && \
+#     git clone https://github.com/discourse/discourse-push-notifications /assets/discourse/plugins/push && \
+#     ## Spoiler Alert
+#     # git clone https://github.com/discourse/discourse-spoiler-alert /assets/discourse/plugins/spoiler-alert && \
+#     ## Adds the ability for voting on a topic in category
+#     git clone https://github.com/discourse/discourse-voting.git /assets/discourse/plugins/voting && \
+#     # Ensure the directory exists before chown
+#     mkdir -p /assets/discourse/plugins && \
+#     chown -R discourse:discourse /assets/discourse /app
 
 # Cleanup
 RUN apt-get autoremove -y && \

@@ -28,14 +28,14 @@ bootstrap_filesystem() {
     create_logrotate discourse_puma_error "${LOG_PATH}"/${PUMA_LOG_FILE_ERROR} discourse discourse
     create_logrotate discourse_sidekiq "${LOG_PATH}"/${SIDEKIQ_LOG_FILE} discourse discourse
 
-    if [ ! -d "${PLUGIN_PATH}" ]; then
-        mkdir -p "${PLUGIN_PATH}"
-    fi
-    if [ "${PLUGIN_PATH}" != "/app/plugins/" ] ; then
-        rm -rf /app/plugins
-        ln -sf "${PLUGIN_PATH}" /app/public/uploads
-    fi
-    if [ $(stat -c %U "${PLUGIN_PATH}") != "discourse" ] ; then chown discourse:discourse "${PLUGIN_PATH}" ; fi
+    # if [ ! -d "${PLUGIN_PATH}" ]; then
+    #     mkdir -p "${PLUGIN_PATH}"
+    # fi
+    # if [ "${PLUGIN_PATH}" != "/app/plugins/" ] ; then
+    #     rm -rf /app/plugins
+    #     ln -sf "${PLUGIN_PATH}" /app/public/uploads
+    # fi
+    # if [ $(stat -c %U "${PLUGIN_PATH}") != "discourse" ] ; then chown discourse:discourse "${PLUGIN_PATH}" ; fi
 
     if [ ! -d "${UPLOADS_PATH}" ]; then
         mkdir -p "${UPLOADS_PATH}"
@@ -319,128 +319,149 @@ EOF
             /app/config/puma.rb
 }
 
-configure_plugins() {
-    if var_true "${PLUGIN_ENABLE_ASSIGN}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/assign ] ; then
-            print_notice "Enabling Plugin: Assign"
-            cp -R /assets/discourse/plugins/assign /app/plugins/
-        fi
-    fi
+# configure_plugins() {
+#     if var_true "${PLUGIN_ENABLE_ASSIGN}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/assign ] ; then
+#             print_notice "Enabling Plugin: Assign"
+#             cp -R /assets/discourse/plugins/assign /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_CHAT_INTEGRATION}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/chat ] ; then
-            print_notice "Enabling Plugin: Chat Integration"
-            cp -R /assets/discourse/plugins/chat /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_CHAT_INTEGRATION}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/chat ] ; then
+#             print_notice "Enabling Plugin: Chat Integration"
+#             cp -R /assets/discourse/plugins/chat /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_CHECKLIST}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/checklist ] ; then
-            print_notice "Enabling Plugin: Checklist"
-            cp -R /assets/discourse/plugins/checklist /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_CHECKLIST}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/checklist ] ; then
+#             print_notice "Enabling Plugin: Checklist"
+#             cp -R /assets/discourse/plugins/checklist /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_DETAILS}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/discourse-details ] ; then
-            print_notice "Enabling Plugin: Details"
-            cp -R /assets/discourse/plugins/discourse-details /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_DETAILS}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/discourse-details ] ; then
+#             print_notice "Enabling Plugin: Details"
+#             cp -R /assets/discourse/plugins/discourse-details /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_EVENTS}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/events ] ; then
-            print_notice "Enabling Plugin: Events"
-            cp -R /assets/discourse/plugins/events /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_EVENTS}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/events ] ; then
+#             print_notice "Enabling Plugin: Events"
+#             cp -R /assets/discourse/plugins/events /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_LAZY_YOUTUBE}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/lazy-yt ] ; then
-            print_notice "Enabling Plugin: Lazy YouTube"
-            cp -R /assets/discourse/plugins/lazy-yt /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_LAZY_YOUTUBE}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/lazy-yt ] ; then
+#             print_notice "Enabling Plugin: Lazy YouTube"
+#             cp -R /assets/discourse/plugins/lazy-yt /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_LOCAL_DATES}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/lazy-yt ] ; then
-            print_notice "Enabling Plugin: Local Dates"
-            cp -R /assets/discourse/plugins/discourse-local-dates /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_LOCAL_DATES}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/lazy-yt ] ; then
+#             print_notice "Enabling Plugin: Local Dates"
+#             cp -R /assets/discourse/plugins/discourse-local-dates /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_NARRATIVE_BOT}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/discourse-narrative-bot ] ; then
-            print_notice "Enabling Plugin: Narrative Bot"
-            cp -R /assets/discourse/plugins/discourse-narrative-bot /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_NARRATIVE_BOT}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/discourse-narrative-bot ] ; then
+#             print_notice "Enabling Plugin: Narrative Bot"
+#             cp -R /assets/discourse/plugins/discourse-narrative-bot /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_POLLS}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/polls ] ; then
-            print_notice "Enabling Plugin: Polls"
-            cp -R /assets/discourse/plugins/poll /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_POLLS}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/polls ] ; then
+#             print_notice "Enabling Plugin: Polls"
+#             cp -R /assets/discourse/plugins/poll /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_PRESENCE}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/discourse-presence ] ; then
-            print_notice "Enabling Plugin: Presence"
-            cp -R /assets/discourse/plugins/discourse-presence /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_PRESENCE}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/discourse-presence ] ; then
+#             print_notice "Enabling Plugin: Presence"
+#             cp -R /assets/discourse/plugins/discourse-presence /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_PUSH_NOTIFICATIONS}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/push ] ; then
-            print_notice "Enabling Plugin: Push Notifications"
-            cp -R /assets/discourse/plugins/push /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_PUSH_NOTIFICATIONS}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/push ] ; then
+#             print_notice "Enabling Plugin: Push Notifications"
+#             cp -R /assets/discourse/plugins/push /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_STYLEGUIDE}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/styleguide ] ; then
-            print_notice "Enabling Plugin: Style Guide"
-            cp -R /assets/discourse/plugins/styleguide /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_STYLEGUIDE}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/styleguide ] ; then
+#             print_notice "Enabling Plugin: Style Guide"
+#             cp -R /assets/discourse/plugins/styleguide /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_SAME_ORIGIN}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/allow-same-origin ] ; then
-            print_notice "Enabling Plugin: Same Origin"
-            cp -R /assets/discourse/plugins/allow-same-origin /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_SAME_ORIGIN}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/allow-same-origin ] ; then
+#             print_notice "Enabling Plugin: Same Origin"
+#             cp -R /assets/discourse/plugins/allow-same-origin /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_SOLVED}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/solved ] ; then
-            print_notice "Enabling Plugin: Solved"
-            cp -R /assets/discourse/plugins/solved /app/plugins/
-        fi
-    fi
+#     if var_true "${PLUGIN_ENABLE_SOLVED}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/solved ] ; then
+#             print_notice "Enabling Plugin: Solved"
+#             cp -R /assets/discourse/plugins/solved /app/plugins/
+#         fi
+#     fi
 
-    if var_true "${PLUGIN_ENABLE_VOTING}" ; then
-        plugin_installed=true
-        if [ ! -d ${PLUGIN_PATH}/voting ] ; then
-            print_notice "Enabling Plugin: Voting"
-            cp -R /assets/discourse/plugins/voting /app/plugins/
-        fi
+#     if var_true "${PLUGIN_ENABLE_VOTING}" ; then
+#         plugin_installed=true
+#         if [ ! -d ${PLUGIN_PATH}/voting ] ; then
+#             print_notice "Enabling Plugin: Voting"
+#             cp -R /assets/discourse/plugins/voting /app/plugins/
+#         fi
+#     fi
+# }
+
+database_exists() {
+    # Replace 'your_database_name' with the actual name of your database
+    if bundle exec rake db:info | grep -q 'discourse'; then
+        return 0  # Database exists
+    else
+        return 1  # Database does not exist
     fi
 }
 
+create_db() {
+    if var_true "${ENABLE_DB_CREATE}" ; then
+        # Check if the database already exists
+        if ! database_exists; then
+            print_info "Creating Database - This may take a bit.."
+            cd /app
+            silent bundle exec rake db:create
+        else
+            print_info "Database already exists. Skipping creation."
+        fi
+    fi
+}
 migrate_db() {
     if var_true "${ENABLE_DB_MIGRATE}" ; then
         print_info "Migrating Database - This may take a bit.."
@@ -450,7 +471,7 @@ migrate_db() {
 }
 
 compile_assets() {
-    if var_true "${ENABLE_PRECOMPILE_ASSETS}" || var_true "${plugin_installed}" ; then
+    if var_true "${ENABLE_PRECOMPILE_ASSETS}" ; then
         print_info "Precompiling Assets - This may take a bit.."
         cd /app
         silent bundle exec rake assets:precompile
