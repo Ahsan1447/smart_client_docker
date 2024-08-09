@@ -126,7 +126,7 @@ RUN git clone "https://github.com/Ahsan1447/smart_client_discourse" /app && \
     bundle config build.nokogiri --use-system-libraries && \
     bundle config --local path ./vendor/bundle && \
     bundle config set --local deployment true && \
-    bundle config set --local without development test && \
+    # bundle config set --local without development test && \
     bundle install --jobs 4 && \
     yarn install && \
     yarn cache clean && \
