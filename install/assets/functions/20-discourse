@@ -443,7 +443,7 @@ EOF
 
 database_exists() {
     # Replace 'your_database_name' with the actual name of your database
-    if bundle exec rake db:info | grep -q 'discourse'; then
+    if bundle exec rake db:info | grep -q 'create_db'; then
         return 0  # Database exists
     else
         return 1  # Database does not exist
