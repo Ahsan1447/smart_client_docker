@@ -122,53 +122,40 @@ RUN npm install -g npm@10.8.2 && \
 RUN git clone "https://github.com/Ahsan1447/smart_client_discourse" /app && \
     BUNDLER_VERSION="$(grep "BUNDLED WITH" /app/Gemfile.lock -A 1 | grep -v "BUNDLED WITH" | tr -d "[:space:]")" && \
     gem install bundler:"${BUNDLER_VERSION}" && \
+    chown -R discourse:discourse /app && \
     cd /app && \
     bundle config build.nokogiri --use-system-libraries && \
     bundle config --local path ./vendor/bundle && \
     bundle config set --local deployment true && \
-    # bundle config set --local without development test && \
     bundle install --jobs 4 && \
     yarn install && \
     yarn cache clean && \
     cd /app/app/assets/javascripts/discourse && \
     /app/node_modules/.bin/ember build -prod && \
-    # bundle exec rake maxminddb:get && \
     find /app/vendor/bundle -name tmp -type d -exec rm -rf {} + && \
     sed -i "5i\ \ require 'uglifier'" /app/config/environments/development.rb && \
-    sed -i "s|config.assets.js_compressor = :uglifier|config.assets.js_compressor = Uglifier.new(harmony: true)|g" /app/config/environments/development.rb
+    sed -i "s|config.assets.js_compressor = :uglifier|config.assets.js_compressor = Uglifier.new(harmony: true)|g" /app/config/environments/development.rb && \
+    # Start the if block to check for the isomorphic folder and perform operations
+    if [ -d "/app/isomorphic" ]; then \
+        rm -rf /app/isomorphic/login && \
+        rm -rf /app/isomorphic/locale && \
+        rm -rf /app/isomorphic/system/modules-debug && \
+        rm -rf /app/isomorphic/system/development && \
+        mv /app/isomorphic /app/plugins/post_creation_interceptor/assets/javascripts && \
+        # Replace the 'with' usage in ISC_Core.js with the refactored code
+        sed -i '274,279d; 273r /dev/stdin' /app/plugins/post_creation_interceptor/assets/javascripts/isomorphic/system/modules/ISC_Core.js <<< 'if (!isc.$611) isc.$611 = 0; isc.$611++; var _7; if (_4 && isc.Browser.isIE && !_3 && isc.Page.isLoaded()) { _7 = this.evalInIFrame(_1, _2); } else { if (this.$254u && !this.$254v) { if (this.$255c != null) { _2 = isc.addProperties({}, _2, this.$255c); } try { if (_2) { var evalContext = Object.assign({}, _2); if (_3) { _7 = Function("with(this) { return window.eval(arguments[0]); }").call(evalContext, _1); } else { _7 = Function("with(this) { return eval(arguments[0]); }").call(evalContext, _1); } } else if (_3) { _7 = window.eval(_1); } else { _7 = eval(_1); } } catch (e) { var _8 = { errorType: "JavaScript Exception", error: e }; var _9 = this.$254w; this.endAEM(); _9(_8); } } else { if (_2) { var evalContext = Object.assign({}, _2); if (_3) { _7 = Function("with(this) { return window.eval(arguments[0]); }").call(evalContext, _1); } else { _7 = Function("with(this) { return eval(arguments[0]); }").call(evalContext, _1); } } else { if (_3) { _7 = window.eval(_1); } else { _7 = eval(_1); } } } }' ; \
+    fi
 
 RUN git config --global --add safe.directory /app
-
-# Install Plugins
-# RUN mkdir -p /assets/discourse/plugins && \
-#     mv /app/plugins/* /assets/discourse/plugins && \
-#     rm -rf /assets/discourse/plugins/discourse-nginx-performance-report && \
-#     git clone https://github.com/TheBunyip/discourse-allow-same-origin.git /assets/discourse/plugins/allow-same-origin && \
-#     git clone https://github.com/discourse/discourse-solved /assets/discourse/plugins/solved && \
-#     git clone https://github.com/discourse/discourse-assign /assets/discourse/plugins/assign && \
-#     # git clone https://github.com/cpradio/discourse-plugin-checklist /assets/discourse/plugins/checklist && \
-#     git clone https://github.com/angusmcleod/discourse-events /assets/discourse/plugins/events && \
-#     # git clone https://github.com/discourse/discourse-footnote /assets/discourse/plugins/footnote && \
-#     git clone https://github.com/MonDiscourse/discourse-formatting-toolbar /assets/discourse/plugins/formatting-toolbar && \
-#     git clone https://github.com/unfoldingWord/discourse-mermaid /assets/discourse/plugins/mermaid && \
-#     git clone https://github.com/discourse/discourse-post-voting /assets/discourse/plugins/post-voting && \
-#     git clone https://github.com/discourse/discourse-push-notifications /assets/discourse/plugins/push && \
-#     ## Spoiler Alert
-#     # git clone https://github.com/discourse/discourse-spoiler-alert /assets/discourse/plugins/spoiler-alert && \
-#     ## Adds the ability for voting on a topic in category
-#     git clone https://github.com/discourse/discourse-voting.git /assets/discourse/plugins/voting && \
-#     # Ensure the directory exists before chown
-#     mkdir -p /assets/discourse/plugins && \
-#     chown -R discourse:discourse /assets/discourse /app
 
 # Cleanup
 RUN apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/ /tmp/ /usr/src/*
 
-COPY database.yml /app/config/database.yml
-COPY development.rb /app/config/environments/development.rb
-COPY production.rb /app/config/environments/production.rb
 WORKDIR /app
 EXPOSE 3000 4200
 COPY install/ /
+COPY database.yml /app/config/database.yml
+COPY development.rb /app/config/environments/development.rb
+# COPY production.rb /app/config/environments/production.rb
