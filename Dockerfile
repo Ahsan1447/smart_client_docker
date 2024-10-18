@@ -134,17 +134,7 @@ RUN git clone "https://github.com/Ahsan1447/smart_client_discourse" /app && \
     /app/node_modules/.bin/ember build -prod && \
     find /app/vendor/bundle -name tmp -type d -exec rm -rf {} + && \
     sed -i "5i\ \ require 'uglifier'" /app/config/environments/development.rb && \
-    sed -i "s|config.assets.js_compressor = :uglifier|config.assets.js_compressor = Uglifier.new(harmony: true)|g" /app/config/environments/development.rb && \
-    # Start the if block to check for the isomorphic folder and perform operations
-    if [ -d "/app/isomorphic" ]; then \
-        rm -rf /app/isomorphic/login && \
-        rm -rf /app/isomorphic/locale && \
-        rm -rf /app/isomorphic/system/modules-debug && \
-        rm -rf /app/isomorphic/system/development && \
-        mv /app/isomorphic /app/plugins/post_creation_interceptor/assets/javascripts && \
-        # Replace the 'with' usage in ISC_Core.js with the refactored code
-        sed -i '274,279d; 273r /dev/stdin' /app/plugins/post_creation_interceptor/assets/javascripts/isomorphic/system/modules/ISC_Core.js <<< 'if (!isc.$611) isc.$611 = 0; isc.$611++; var _7; if (_4 && isc.Browser.isIE && !_3 && isc.Page.isLoaded()) { _7 = this.evalInIFrame(_1, _2); } else { if (this.$254u && !this.$254v) { if (this.$255c != null) { _2 = isc.addProperties({}, _2, this.$255c); } try { if (_2) { var evalContext = Object.assign({}, _2); if (_3) { _7 = Function("with(this) { return window.eval(arguments[0]); }").call(evalContext, _1); } else { _7 = Function("with(this) { return eval(arguments[0]); }").call(evalContext, _1); } } else if (_3) { _7 = window.eval(_1); } else { _7 = eval(_1); } } catch (e) { var _8 = { errorType: "JavaScript Exception", error: e }; var _9 = this.$254w; this.endAEM(); _9(_8); } } else { if (_2) { var evalContext = Object.assign({}, _2); if (_3) { _7 = Function("with(this) { return window.eval(arguments[0]); }").call(evalContext, _1); } else { _7 = Function("with(this) { return eval(arguments[0]); }").call(evalContext, _1); } } else { if (_3) { _7 = window.eval(_1); } else { _7 = eval(_1); } } } }' ; \
-    fi
+    sed -i "s|config.assets.js_compressor = :uglifier|config.assets.js_compressor = Uglifier.new(harmony: true)|g" /app/config/environments/development.rb
 
 RUN git config --global --add safe.directory /app
 
